@@ -30,107 +30,39 @@ In this tutorial, we observe various network traffic to and from Azure Virtual M
 
 <h2>Actions and Observations</h2>
 
-<p> 
+  ![image](https://github.com/user-attachments/assets/50a5f828-35c5-4add-b7ea-f3c5581157df)
 
-  
 <p>
-Deploying Windows and Linux VMs in a Shared Azure Environment
-Create a Resource Group
-
-In the Azure Portal, create a new Resource Group to manage all related resources.
-Deploy a Windows 10 Virtual Machine
-Create a Windows 10 VM, and during setup:
-Select the Resource Group you just created.
-Allow Azure to automatically create a new Virtual Network and Subnet for this VM.
-Deploy a Linux (Ubuntu) Virtual Machine
-Create a Linux VM (Ubuntu), and during setup:
-Choose the same Resource Group used for the Windows VM.
-Select the existing Virtual Network and Subnet created with the Windows VM—this is essential to ensure both VMs can communicate.
-Set the Authentication Type to Username and Password.
-Final Check
-Confirm that both VMs are deployed within the same Virtual Network and Subnet to enable internal communication between them.
-
+In the Azure Portal, create a new Resource Group to organize your resources. Deploy a Windows 10 VM in that group, allowing Azure to create a new Virtual Network and Subnet. Then, deploy a Linux (Ubuntu) VM in the same Resource Group, selecting the existing Virtual Network and Subnet created with the Windows VM. Finally, confirm both VMs share the same network settings to ensure they can communicate internally.
 
 </p>
 <br />
 
 <p>
-<img src="https://i.imgur.com/DJmEXEB.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
+
+![image](https://github.com/user-attachments/assets/eec1c56e-3fc8-47b7-b09f-f770af211ced)
+
 </p>
 <p>
-Connect to the Windows 10 VM
-If you're using a Mac, install Microsoft Remote Desktop from the App Store.
-Use it to connect to your Windows 10 Virtual Machine in Azure.
-Install Wireshark
 Within the Windows 10 VM, download and install Wireshark.
-Launch Wireshark and begin a packet capture on the active network interface.
-Filter for ICMP Traffic
-In the Wireshark filter bar, enter ICMP. This will show only ping (ICMP) traffic.
-  Test Internal Ping
-From the Windows 10 VM, retrieve the private IP address of your Ubuntu (linux) VM from the Azure Portal.
-Open Command Prompt or PowerShell and ping the Ubuntu VM using its private IP.
-Observe the ICMP Echo Requests and Echo Replies in Wireshark.
-Test External Ping
-In the same Windows 10 session, try pinging a public website (e.g., www.google.com) from the Command Prompt or PowerShell.
-Watch the traffic in Wireshark to observe how external ICMP traffic is handled.
-Note that ICMP to public addresses may be blocked by Azure by default, so you might not see replies, but requests will still show in Wireshark.
+
+![image](https://github.com/user-attachments/assets/cdab9678-c762-44fb-b900-5000e3d88989)
+launch Wireshark, then start a capture on the active network interface and filter for ICMP traffic. Ping the Ubuntu VM’s private IP from Command Prompt or PowerShell and observe the ICMP Echo traffic in Wireshark. 
+
 </p>
 <br />
 
 <p>
-<img src="https://i.imgur.com/DJmEXEB.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
+
+![image](https://github.com/user-attachments/assets/8a0c3c98-511a-485f-9b62-2f5b3d3eef92)
+![AB4CF983-8A80-40F8-8899-5D54F9322AC8_1_105_c](https://github.com/user-attachments/assets/23f3bbee-e15e-41a5-a23d-ce885b94a1c6)
 </p>
 <p>
-Firewall Configuration: Controlling ICMP Traffic via Network Security Group (NSG)
-Start a Continuous Ping Test
-From the Windows 10 VM, initiate a continuous ping to the private IP address of the Ubuntu VM
-Block ICMP Traffic
-In the Azure Portal, navigate to the Network Security Group (NSG) attached to the Ubuntu VM’s network interface or subnet.
-Add or modify an inbound security rule to deny ICMP traffic (Protocol: ICMP, Source: Any, Destination: Any, Action: Deny).
-Observe the Effect
-Back in the Windows 10 VM, monitor the ping output and Wireshark capture.
-You should see that ICMP echo replies stop, indicating the traffic is being blocked.
-Re-enable ICMP Traffic
-Return to the NSG settings and remove or disable the deny rule, allowing ICMP traffic again.
-Verify Restoration
-Back in the Windows 10 VM, observe that ping replies resume in both the command line and Wireshark.
-Stop the Ping Activity
-Press Ctrl + C in the command prompt to stop the continuous ping.
+Start a continuous ping from the Windows 10 VM to the Ubuntu VM’s private IP. In the Azure Portal, edit the NSG linked to the Ubuntu VM to deny inbound ICMP traffic. Watch the ping and Wireshark output—ICMP replies should stop. Then, remove or disable the deny rule to re-enable ICMP, and confirm replies resume. Press Ctrl + C to stop the ping.
 </p>
 
-Observe SSH Traffic from Windows to Ubuntu
-Start a New Wireshark Capture
-On the Windows 10 VM, open Wireshark and begin a new packet capture.
-Use the filter ssh
-Establish an SSH Connection
-Open PowerShell and SSH into the Ubuntu VM using its private IP ssh labuser@<Ubuntu-Private-IP-Address> Enter the password when prompted, and interact with the Linux shell.
-Monitor Traffic
-Observe the steady stream of SSH packets in Wireshark as you type commands.
-Exit SSH Session
-To disconnect, type exit and press Enter.
+![image](https://github.com/user-attachments/assets/9b095224-0671-4f2a-9d44-073e454f683b)
+On the Windows 10 VM, start a new Wireshark capture and apply the filter ssh. Open PowerShell and connect to the Ubuntu VM using ssh labuser@<Ubuntu-Private-IP-Address>, entering the password when prompted. As you interact with the Linux shell, watch the SSH traffic appear in Wireshark. When done, type exit to end the session.
 
-Observe DHCP Traffic
-Filter for DHCP in Wireshark
-Use the following Wireshark filter dhcp
-Renew the IP Address
-In PowerShell (run as Administrator) on the Windows 10 VM, issue
-Watch the Traffic
-Observe DHCP discovery, offer, request, and acknowledgment packets in Wireshark as the VM requests a new IP.
 
-Observe DNS Traffic
-Apply DNS Filter in Wireshark
-
-Use the following Wireshark filter dns 
-Perform DNS Lookups
-In Command Prompt or PowerShell, use nslookup to resolve domain names nslookup google.com / disney.com
-Monitor DNS Queries
-Watch the DNS request and response packets in Wireshark
-
-Observe RDP Traffic
-Filter RDP in Wireshark
-Use the following filter to isolate Remote Desktop traffic tcp.port == 3389
-Observe Traffic Behavior
-
-You’ll notice a constant stream of RDP packets, even when idle.
-Why the Continuous Traffic?
-Answer: RDP maintains a live visual connection between client and host. The session continuously transmits screen updates, cursor movements, and heartbeat signals, resulting in non-stop traffic to ensure a real-time experience.
+You can use Wireshark to see other filters such as dhcp, dns, and tcp.port == 3389 to observe DHCP, DNS, and RDP traffic on the Windows 10 VM. Renew the IP in PowerShell to see DHCP packets, and run nslookup to trigger DNS queries. RDP traffic appears as a constant stream, even when idle, due to ongoing screen updates and heartbeat signals that maintain the live session.
